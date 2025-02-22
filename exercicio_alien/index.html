@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercício do Alien</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        ;
+    </style>
+</head>
+
+<body>
+    <script>
+        //Definição dos valores de largura e altura do jogo, deixando esses valores constantes
+        const larguraJogo = 700;
+        const alturaJogo = 850;
+
+        //Define as configurações do jogo
+        const config = {
+            type: Phaser.AUTO,
+            width: larguraJogo,
+            height: alturaJogo,
+
+            //Adiciona a física no jogo
+            physics: {
+                default: 'arcade', //Define qual será a física utilizada
+                arcade: { //Define a física do modo "arcade"
+                    gravity: { y: 300 }, //Comando para adicionar a gravidade, no caso há apenas no eixo Y
+                    debug: true //Ativar as visualizações de depuração. Visualizar as linhas de contato e aceleração do personagem
+                }
+            },
+
+            scene: {
+                preload: preload,
+                create: create,
+                update: update
+            }
+        };
+
+        const game = new Phaser.Game(config);
+
+        var alien; //Variável para guardar o alien
+        var teclado; //Variável para acessar o teclado
+        var fogo; //Variável para guardar o fogo do turbo
+        var plataforma; //Variável para guardar a plataforma
+        var moeda; //Variável para guardar a moeda
+        var pontuacao = 0; //Variável para guardar as pontuações
+        var placar; //Variável para guardar o placar
+        var espinho; //Variável para guardar o espinho
+        var coracao;
+        var pontuacaoCoracao = 3;
+        var plataformaEspinho;
+
+        function preload() {
+            //Carrega as imagens
+            this.load.image('bg', 'assets/bg.png'); //Carrega o background 
+            this.load.image('player', 'assets/alienigena.png'); //Carrega o personagem
+            this.load.image('turbo', 'assets/turbo.png'); //Carrega o turbo
+            this.load.image('tijolo', 'assets/tijolos.png'); //Carrega a plataforma
+            this.load.image('moeda', 'assets/moeda.png'); //Carrega a moeda
+            this.load.image('coracao', 'assets/coracao.png'); //Carrega o coração
+            this.load.image('espinhos', 'assets/espinho.png'); //Carrega os espinhos
+
+        }
+        function create() {
+
+            //Adiciona as imagens
+            this.add.image(larguraJogo / 2, alturaJogo / 2, 'bg'); //Adiciona o background
+
+            fogo = this.add.sprite(0, 0, 'turbo'); //Adicionar o turbo
+            fogo.setVisible(false);//Não deixar o turbo visível
+
+            //Comando para adicionar um elemento com física -> this.phsyics.add.sprite(posX, posY, 'nome do elemnto') 
+            alien = this.physics.add.sprite(larguraJogo / 2, 0, 'player'); //Variável atribuída ao alien 
+
+            //Adicionar limites físicos ao jogo
+            alien.setCollideWorldBounds(true); //Comando para adicionar os limites do mundo a um elemento -> elemento.setCollideWorldBound(true);
+
+            //alien.body.setSize(20, 40, true); //Comando para mudar o tamanho do corpo de um elemento -> elemento.body.setSize( largura, altura, estado de centralização desse corpo - true = centraliza | false = fica setado no canto superior esquerdo-)
+
+            teclado = this.input.keyboard.createCursorKeys(); //Comando para acessar as teclas do teclado -> this.input.keyboard.createCursorKeys
+
+            //Adiconar a plataforma
+            plataforma = this.physics.add.staticImage(larguraJogo / 2, alturaJogo / 2, 'tijolo'); //Adicionar uma plataforma estática
+            this.physics.add.collider(alien, plataforma); //Adicionar colisão entre o alien e plataforma. Comando para adiconar colisão entre dois elementos -> this.add.collider(elem1, elem2);
+
+            //Adicionar outra plataforma
+            plataformaEspinho = this.physics.add.staticImage(500, 300,  'tijolo'); 
+            this.physics.add.collider(alien, plataformaEspinho); 
+
+            //Adicionar a moeda
+            moeda = this.physics.add.sprite(larguraJogo / 2, 0, 'moeda'); //Adicionar a moeda com física
+            moeda.setCollideWorldBounds(true); //Adiconar os limites do mapa
+            this.physics.add.collider(moeda, plataforma); //Adicionar colisão entre moeda e plataforma
+            this.physics.add.collider(moeda, plataformaEspinho); //Adicionar colisão entre moeda e outra plataforma
+            moeda.setBounce(0.7); //Deixar a moeda quicando
+
+            //Adicionar o placar
+            placar = this.add.text(50, 50, `Moedas: ${pontuacao}`, { fontSize: '45px', fill: '#495613' }); //Criar o placar. Comando para adicionar um texto -> this.add.text(posX, posY, "texto", {estilo});
+
+            //Pegar moeda
+            this.physics.add.overlap(alien, moeda, function () { //Adicionar o overlap (sequencia de ações quando dois elementos se encontrarem) -> this.physics.add.overlap(elemen1, elemen2, o que fazer)
+                moeda.setVisible(false);//Esconder a moeda para dar a impressão de que ela sumiu
+
+                var posicaoMoedaY = Phaser.Math.RND.between(50, 650);//Gerar uma posição aleatória para gerar uma nova moeda
+
+                moeda.setPosition(posicaoMoedaY, 100); //Posicionar a moeda em um local aletório
+                pontuacao += 1; //Atualizar a pontuação do placar
+                placar.setText(`Moedas: ${pontuacao}`); //Atualizar o texto do placar
+                moeda.setVisible(true); //Mostrar a nova moeda
+            })
+
+            //Adicionar vidas
+            this.add.image(50, 140, 'coracao');
+            coracao = this.add.text(80, 120, `Vidas: ${pontuacaoCoracao}`, { fontSize: '45px', fill: '#495613' })
+
+            //Adicionar espinho
+            /*espinho = this.physics.add.staticImage(500, 300, 'espinhos').setScale(0.1); //Comando para adicionar uma imagem estática
+            espinho.body.setSize(20, 40, true);*/
+            
+            //this.physics.add.overlap(alien, espinho, function () {
+                //Adicionar um tempo para perder a próxima vida
+                //const tempoVida = setTimeout(perderVida, 5000)
+
+                //Subtrair vida 
+                /*function perderVida() {
+                    pontuacaoCoracao -= 1;
+                    coracao.setText(`Vidas: ${pontuacaoCoracao}`);
+                }
+
+
+            })*/
+
+
+        }
+        function update() {
+
+            //Verificar se as teclas foram apertadas -> variavelParaTeclado.nomeDaTecla.isDown
+            //Setas do teclado: .right | .right | .up | .down
+            //Como a gravidade é uma aceleração, a movimentação do personagem pode ser feita alterando a velocidade do elemento.
+
+            //Movimentação do personagem de acordo com as setas dos teclado
+
+            //Eixo X
+            //Se a seta para esquerda for pressionada, o alien vai para a direita
+            if (teclado.left.isDown) {
+                alien.setVelocityX(-200); //Comando para ativar a movimentação para a dierita -> personagem.setVelocityX(-valor);
+            }
+            //Se a seta da esquerda for pressionada, o alien vai para a esquerda, sendo que não tem como o alien ir para a esquerda e direita ao mesmo tempo
+            else if (teclado.right.isDown) {
+                alien.setVelocityX(200); //Comando para ativar a movimentação para a esquerda -> personagem.setVelocityX(valor);
+            }
+            //Se nenhuma delas for pressionada, o alien volta a cair reto em direção ao chão
+            else { alien.setVelocityX(0); }
+
+            //Eixo Y
+            //Se a seta para cima for apertada, o alien vai para cima. Não há necessidade de uma condição para quando a seta p/baixo, já que por causa da gravidade o personagem vai naturalmente para baixo
+            if (teclado.up.isDown) {
+                alien.setVelocityY(-200); //Comando para ativar a movimentação para cima -> personagem.setVelocityY(-valor);
+                ativarTurbo(); //Quando o personagem estiver indo para cima o turbo é ativado
+            }
+            //Se nenhuma da tecla for apertada, nada acontece no eixo Y
+            else { semTurbo(); } //Quando o personagem não estiver indo para cima, não existe motivos para o turbo ser ativado
+
+            fogo.setPosition(alien.X, alien.Y + alien.height / 2); //Comando para atualizar a posição de algo -> elemento.setPosition(posX,posY);. A posição Y é baseada que a coordenada Y do alien está relacionada ao centro do alien, e para deixar o fogo na ponta dele é necessário soma a metade da altura do personagem.
+
+        }
+
+        //Função para deixar o turbo visível
+        function ativarTurbo() {
+            fogo.setVisible(true); //Comando para deixar o turbo visível
+            console.log("turboativado");
+        }
+
+        //Função para não deixar o turbo visível
+        function semTurbo() {
+            fogo.setVisible(false); //Comando para desativar o turbo
+            console.log("turbodesligado");
+        }
+    </script>
+
+</body>
+
+</html>
