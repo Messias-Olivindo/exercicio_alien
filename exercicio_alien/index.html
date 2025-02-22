@@ -95,8 +95,8 @@
             this.physics.add.collider(alien, plataforma); //Adicionar colisão entre o alien e plataforma. Comando para adiconar colisão entre dois elementos -> this.add.collider(elem1, elem2);
 
             //Adicionar outra plataforma
-            plataformaEspinho = this.physics.add.staticImage(500, 300,  'tijolo'); 
-            this.physics.add.collider(alien, plataformaEspinho); 
+            plataformaEspinho = this.physics.add.staticImage(500, 300, 'tijolo');
+            this.physics.add.collider(alien, plataformaEspinho);
 
             //Adicionar a moeda
             moeda = this.physics.add.sprite(larguraJogo / 2, 0, 'moeda'); //Adicionar a moeda com física
@@ -127,19 +127,19 @@
             //Adicionar espinho
             /*espinho = this.physics.add.staticImage(500, 300, 'espinhos').setScale(0.1); //Comando para adicionar uma imagem estática
             espinho.body.setSize(20, 40, true);*/
-            
+
             //this.physics.add.overlap(alien, espinho, function () {
-                //Adicionar um tempo para perder a próxima vida
-                //const tempoVida = setTimeout(perderVida, 5000)
+            //Adicionar um tempo para perder a próxima vida
+            //const tempoVida = setTimeout(perderVida, 5000)
 
-                //Subtrair vida 
-                /*function perderVida() {
-                    pontuacaoCoracao -= 1;
-                    coracao.setText(`Vidas: ${pontuacaoCoracao}`);
-                }
+            //Subtrair vida 
+            /*function perderVida() {
+                pontuacaoCoracao -= 1;
+                coracao.setText(`Vidas: ${pontuacaoCoracao}`);
+            }
 
 
-            })*/
+        })*/
 
 
         }
